@@ -81,7 +81,7 @@ class SwiGLU(nn.Module):
         self.w2 = nn.Linear(n_embed * hidden_size,n_embed,bias=False)
         self.dropout = nn.Dropout(0.2)
     def forward(self,x):
-        out = self.dropout(self.w2(self.w2(F.silu(self.w1(x)) @ self.v1(x))))
+        out = self.dropout(self.w2(F.silu(self.w(x)) * self.v(x)))
         return out
     
 class Head(nn.Module):
