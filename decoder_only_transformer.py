@@ -71,6 +71,19 @@ class FeedForward(nn.Module):
     def forward(self,x):
         out = self.net(x)
         return out
+    
+class SwiGLU(nn.Module):
+    def __init__(self,n_embd):
+        super().__init__()
+        hidden_size = int(4 * (2/3))
+        self.w = nn.Linear(n_embed,n_embed * hidden_size,bias=False)
+        self.v = nn.Linear(n_embed,n_embed * hidden_size,bias=False)
+        self.w2 = nn.Linear(n_embed * hidden_size,n_embed,bias=False)
+        self.dropout = nn.Dropout(0.2)
+    def forward(self,x):
+        out = self.dropout(self.w2(self.w2(F.silu(self.w1(x)) @ self.v1(x))))
+        return out
+    
 class Head(nn.Module):
     def __init__(self,head_size):
         super().__init__()
@@ -107,7 +120,7 @@ class Block(nn.Module):
     def __init__(self,n_embed,n_heads):
         super().__init__()
         self.sa_heads = MultiHeadAttention(n_heads,n_embed // n_heads)
-        self.ffwd = FeedForward(n_embed)
+        self.ffwd = SwiGLU(n_embed)
         self.ln1 = nn.LayerNorm(n_embed)
         self.ln2 = nn.LayerNorm(n_embed)
 
